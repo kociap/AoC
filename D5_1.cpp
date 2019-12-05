@@ -51,20 +51,16 @@ int main() {
             i64 mode3 = ops[i] / 10000 % 10;
             switch(ops[i] % 100) {
                 case 1: {
-                    std::cout << "op 1 (" << ops[i] << ") at " << i << '\n';
                     i64 a1 = value(mode1, ops[i + 1]);
                     i64 a2 = value(mode2, ops[i + 2]);
                     i64 r = ops[i + 3];
-                    std::cout << "1 " << ops[i + 1] << " " << ops[i + 2] << " " << ops[i + 3] << " ; ops[" << r << "] = " << a1 << " + " << a2 << '\n';
                     ops[r] = a1 + a2;
                     i += 4;
                 } break;
                 case 2: {
-                    std::cout << "op 2 (" << ops[i] << ") at " << i << '\n';
                     i64 a1 = value(mode1, ops[i + 1]);
                     i64 a2 = value(mode2, ops[i + 2]);
                     i64 r = ops[i + 3];
-                    std::cout << "2 " << ops[i + 1] << " " << ops[i + 2] << " " << ops[i + 3] << " ; ops[" << r << "] = " << a1 << " * " << a2 << '\n';
                     ops[r] = a1 * a2;
                     i += 4;
                 } break;
@@ -73,13 +69,8 @@ int main() {
                     i += 2;
                 } break;
                 case 4: {
-                    std::cout << "op 4 (" << ops[i] << ") at " << i << '\n';
                     i64 const val = value(mode1, ops[i + 1]);
-                    if(val != 0) {
-                        std::cout << "4 " << ops[i + 1] << " ; " << val << '\n';
-                    } else {
-                        std::cout << "4 " << ops[i + 1] << " ; " << val << '\n';
-                    }
+                    std::cout << value(mode1, ops[i + 1]) << '\n';
                     i += 2;
                 } break;
                 case 99:
