@@ -11,14 +11,12 @@ class Vector: public std::vector<T> {
 
 public:
     using base::base;
-
     Vector(base const& b): base(b) {}
 
     T& operator[](std::size_t index) {
         if (index > base::size()) {
-            std::cout << "out of bounds access " << index << "\n";
             if (index > 300000) {
-                throw - 1;
+                throw "out of bounds access " + std::to_string(index) + "\n";
             }
 
             i64 min_size = base::size();
@@ -26,7 +24,7 @@ public:
                 min_size *= 2;
             }
 
-            std::cout << "resizing to " << min_size << '\n';
+            std::cout << "out of bounds access " << index << ". resizing to " << min_size << '\n';
             base::resize(min_size, 0);
         }
 
@@ -46,8 +44,7 @@ public:
 
     i64 read() {
         if (values.size() == 0) {
-            std::cout << "\ncan't read from empty stream\n";
-            throw - 1;
+            throw std::string("can't read from empty stream\n");
         }
 
         i64 const v = values.front();
@@ -71,15 +68,7 @@ public:
     // 0 - halted
     // 1 - waiting for input
     i64 run(Stream& input, Stream& output) {
-        auto mem_dump = [this]() {
-            std::cout << "\nmem dump: ";
-            for (i64 a: ops) {
-                std::cout << a << ' ';
-            }
-            std::cout << '\n';
-        };
-
-        auto value = [this, &mem_dump](i64 mode, i64 offset) -> i64 {
+        auto value = [this](i64 mode, i64 offset) -> i64 {
             switch (mode) {
             case 0:
                 return ops[offset];
@@ -88,13 +77,11 @@ public:
             case 2:
                 return ops[relative_base + offset];
             default:
-                std::cout << "unknown access mode " << mode << '\n';
-                mem_dump();
-                throw - 1;
+                throw "unknown access mode " + std::to_string(mode) + "\n";
             }
         };
 
-        auto write = [this, &mem_dump](i64 mode, i64 offset, i64 value) -> void {
+        auto write = [this](i64 mode, i64 offset, i64 value) -> void {
             switch (mode) {
             case 0:
                 ops[offset] = value;
@@ -103,9 +90,7 @@ public:
                 ops[relative_base + offset] = value;
                 break;
             default:
-                std::cout << "unknown write mode " << mode << '\n';
-                mem_dump();
-                throw - 1;
+                throw "unknown write mode " + std::to_string(mode) + "\n";
             }
         };
 
@@ -214,22 +199,28 @@ public:
 
                 case 99:
                     // std::cout << "op 99 ; halting\n";
-                    mem_dump();
                     return 0;
 
                 default:
-                    std::cout << "unknown op (" << ops[i] << ") at " << i << "\n";
-                    throw - 1;
+                    throw "unknown op (" + std::to_string(ops[i]) + ") at " + std::to_string(i) + "\n";
                 }
             }
-        } catch (...) {
-            std::cout << "relative_base " << relative_base << " offset " << i << " op " << ops[i];
-            mem_dump();
-            throw - 1;
-        }
 
-        std::cout << "program terminated unexpectedly\n";
-        throw - 1;
+            throw std::string("program terminated unexpectedly\n");
+
+        } catch (std::string const& message) {
+            std::string msg_with_program_info =
+                message + "relative_base " + std::to_string(relative_base) + " offset " + std::to_string(i) + " op " + std::to_string(ops[i]);
+            throw msg_with_program_info;
+        }
+    }
+
+    void mem_dump() {
+        std::cout << "\nmem dump: ";
+        for (i64 a: ops) {
+            std::cout << a << ' ';
+        }
+        std::cout << '\n';
     }
 
 private:
@@ -249,14 +240,17 @@ int main() {
         std::cin.get();
     }
 
+    Intcode_Exec exec(ops);
+    Stream in(1), out;
     try {
-        Intcode_Exec exec(ops);
-        Stream in(2), out;
         exec.run(in, out);
         while (!out.eoi()) {
             std::cout << out.read() << ' ';
         }
-    } catch (...) {}
+    } catch (std::string const& msg) {
+        std::cout << msg;
+        exec.mem_dump();
+    }
 
     return 0;
 }
