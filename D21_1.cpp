@@ -228,8 +228,6 @@ int main() {
         }
 
         char const* program = "NOT A J\n"
-                              "NOT B T\n"
-                              "OR T J\n"
                               "NOT C T\n"
                               "OR T J\n"
                               "AND D J\n"
